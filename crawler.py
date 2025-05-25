@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 def get_momo_product_info(momo_id):
@@ -26,27 +28,26 @@ def get_momo_product_info(momo_id):
         driver.get(url)
         print("🌍 網頁已載入", flush=True)
 
-        for _ in range(10):
-            try:
-                price_el = driver.find_element(By.CSS_SELECTOR, "ul.prdPrice li.special span")
-                price_text = price_el.text.strip().replace(',', '').replace('$', '')
-                price = int(''.join(filter(str.isdigit, price_text)))
+        # ✅ 等待價格出現
+        try:
+            price_el = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "ul.prdPrice li.special span"))
+            )
+            price_text = price_el.text.strip().replace(',', '').replace('$', '')
+            price = int(''.join(filter(str.isdigit, price_text)))
 
-                title = driver.title.split("-")[0].strip()
-                print(f"✅ 成功抓到：{title} / {price}", flush=True)
+            title = driver.title.split("-")[0].strip()
+            print(f"✅ 成功抓到：{title} / {price}", flush=True)
 
-                driver.quit()
-                return title, price, url
-            except Exception as e:
-                print("⏳ 嘗試抓價格失敗，重試中...", flush=True)
-                time.sleep(1)
+            driver.quit()
+            return title, price, url
 
-        print("❌ 嘗試多次仍抓不到價格", flush=True)
-        driver.quit()
-        return None, None, url
+        except Exception as e:
+            print(f"❌ 等待價格元素失敗：{e}", flush=True)
+            driver.quit()
+            return None, None, url
 
     except Exception as e:
         print(f"❌ Selenium 發生錯誤：{e}", flush=True)
         driver.quit()
         return None, None, url
-
