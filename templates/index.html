@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>Momo 商品追蹤系統</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h2>🔍 輸入 Momo 商品 ID 加入追蹤</h2>
+  <form method="post">
+    <input type="text" name="momo_id" placeholder="例如：12384723" required>
+    <button type="submit">加入追蹤</button>
+  </form>
+
+  <hr>
+
+  <h2>📌 我的追蹤清單</h2>
+  {% if items %}
+  <table border="1" cellpadding="8">
+    <thead>
+      <tr>
+        <th>商品名稱</th>
+        <th>目前價格</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.price }}</td>
+        <td>
+          <a href="{{ item.url }}" target="_blank">查看商品</a> |
+          <a href="/history/{{ item.id }}">價格圖表</a> |
+          <form method="post" action="/delete/{{ item.id }}" style="display:inline;">
+            <button type="submit" onclick="return confirm('確定要刪除這筆追蹤嗎？')">🗑 刪除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>目前尚未追蹤任何商品。</p>
+  {% endif %}
+
+  {% if success %}
+  <script>
+    alert("✅ 商品已成功加入追蹤清單！");
+  </script>
+  {% endif %}
+</body>
+</html>

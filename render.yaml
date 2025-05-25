@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: momo-tracker
+    env: docker
+    plan: free
+    autoDeploy: true

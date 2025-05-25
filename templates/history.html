@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ name }} 的價格歷史</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>{{ name }} 的價格走勢圖</h2>
+  <a href="/">← 回到追蹤清單</a>
+  <canvas id="priceChart" width="600" height="400"></canvas>
+
+  <script id="price-data" type="application/json">
+    {
+      "timestamps": {{ timestamps | tojson | safe }},
+      "prices": {{ prices | tojson | safe }}
+    }
+  </script>
+
+  <script>
+    const raw = document.getElementById("price-data").textContent;
+    const rawData = JSON.parse(raw);
+
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: rawData.timestamps,
+        datasets: [{
+          label: '價格（元）',
+          data: rawData.prices,
+          borderColor: 'blue',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.2
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            title: { display: true, text: '時間' },
+            ticks: { maxTicksLimit: 10 }
+          },
+          y: {
+            beginAtZero: false,
+            title: { display: true, text: '價格（元）' }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
