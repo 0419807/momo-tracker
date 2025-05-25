@@ -100,12 +100,15 @@ scheduler.start()
 def index():
     if request.method == 'POST':
         momo_id = request.form.get('momo_id')
+        print(f"✅ 收到 momo_id: {momo_id}")
         name, price, url = get_momo_product_info(momo_id)
+        print(f"👉 Selenium 回傳：name={name}, price={price}")
 
         if not name or not price:
-            return "❌ 無法擷取商品資訊", 500
+            return "❌ 無法擷取商品資訊（可能 Selenium 失敗）", 500
 
         insert_tracked(name, price, url)
+        print("✅ 已寫入資料庫")
         return redirect(url_for('index', success=1))
 
     items = get_all_tracked()

@@ -12,10 +12,10 @@ def get_momo_product_info(momo_id):
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1280x800")
-
+    print("🧪 開始啟動 Selenium")
     driver = webdriver.Chrome(options=chrome_options)
     driver.get(url)
-
+    print(f"🧪 已打開：{url}")
     try:
         for _ in range(10):
             try:
