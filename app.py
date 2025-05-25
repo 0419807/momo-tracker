@@ -100,21 +100,26 @@ scheduler.start()
 def index():
     if request.method == 'POST':
         momo_id = request.form.get('momo_id')
-        print(f"✅ 收到 momo_id: {momo_id}")
-        name, price, url = get_momo_product_info(momo_id)
-        print(f"👉 Selenium 回傳：name={name}, price={price}")
+        print(f"📥 收到 momo_id: {momo_id}", flush=True)
 
-        if not name or not price:
-            return "❌ 無法擷取商品資訊（可能 Selenium 失敗）", 500
+        try:
+            name, price, url = get_momo_product_info(momo_id)
+            print(f"📦 抓到資料：{name} / {price}", flush=True)
 
-        insert_tracked(name, price, url)
-        print("✅ 已寫入資料庫")
-        return redirect(url_for('index', success=1))
+            if not name or not price:
+                return "❌ 無法擷取商品資訊（抓不到 name 或 price）", 500
+
+            insert_tracked(name, price, url)
+            print("✅ 寫入成功", flush=True)
+            return redirect(url_for('index', success=1))
+        
+        except Exception as e:
+            print(f"❌ 發生錯誤：{e}", flush=True)
+            return f"❌ 發生例外錯誤：{e}", 500
 
     items = get_all_tracked()
     success = request.args.get("success")
     return render_template('index.html', items=items, success=success)
-
 @app.route('/delete/<int:product_id>', methods=['POST'])
 def delete(product_id):
     delete_tracked(product_id)
