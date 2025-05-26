@@ -1,54 +1,79 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>{{ name }} 的價格歷史</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <title>{{ name }} - 價格歷史圖</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-  <h2>{{ name }} 的價格走勢圖</h2>
-  <a href="/">← 回到追蹤清單</a>
-  <canvas id="priceChart" width="600" height="400"></canvas>
+<body class="bg-light">
 
-  <script id="price-data" type="application/json">
-    {
-      "timestamps": {{ timestamps | tojson | safe }},
-      "prices": {{ prices | tojson | safe }}
-    }
-  </script>
+<div class="container py-5">
+    <h2 class="text-center mb-4">📈 {{ name }} 價格變化圖</h2>
 
-  <script>
-    const raw = document.getElementById("price-data").textContent;
-    const rawData = JSON.parse(raw);
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <canvas id="priceChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-secondary">返回首頁</a>
+    </div>
+</div>
+
+<script>
+    // ✅ 宣告 JS 變數，避免 IDE 偵錯錯誤
+    const timestamps = {{ timestamps | tojson | safe }};
+    const prices = {{ prices | tojson | safe }};
 
     const ctx = document.getElementById('priceChart').getContext('2d');
     const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: rawData.timestamps,
-        datasets: [{
-          label: '價格（元）',
-          data: rawData.prices,
-          borderColor: 'blue',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.2
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            title: { display: true, text: '時間' },
-            ticks: { maxTicksLimit: 10 }
-          },
-          y: {
-            beginAtZero: false,
-            title: { display: true, text: '價格（元）' }
-          }
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: '價格 (元)',
+                data: prices,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.2,
+                borderWidth: 2,
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '時間'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '價格 (元)'
+                    },
+                    beginAtZero: false
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `價格：$${ctx.raw}`
+                    }
+                }
+            }
         }
-      }
     });
-  </script>
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
