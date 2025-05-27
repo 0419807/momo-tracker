@@ -4,7 +4,8 @@ import requests
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
 import time
-from crawler import get_momo_product_info
+# from crawler import get_momo_product_info   # 這是 selenium 版
+from playwright_crawler import get_momo_product_info  # 這是 playwright 版
 
 app = Flask(__name__)
 
@@ -91,7 +92,7 @@ def update_prices():
 
 # 啟動排程器
 scheduler = BackgroundScheduler()
-scheduler.add_job(update_prices, 'interval', days=1)
+scheduler.add_job(update_prices, 'interval', minutes=60)
 scheduler.start()
 
 # -------------------- 路由 --------------------
@@ -145,7 +146,8 @@ def price_history(product_id):
     return render_template('history.html', name=name, prices=prices, timestamps=timestamps)
 
 # -------------------- 主程式 --------------------
-
+import os
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
