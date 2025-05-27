@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright/python:latest
+FROM mcr.microsoft.com/playwright/python:v1.52.0-jammy
 
 # 安裝系統工具（Render 必備）
 RUN apt-get update && apt-get install -y unzip curl && apt-get clean
