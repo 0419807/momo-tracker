@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 import requests
 import re
@@ -8,7 +8,7 @@ import time
 from playwright_crawler import get_momo_product_info  # 這是 playwright 版
 
 app = Flask(__name__)
-
+app.secret_key = 'your-super-secret-key'
 # -------------------- 資料庫操作 --------------------
 
 def init_db():
@@ -101,29 +101,29 @@ scheduler.start()
 def index():
     if request.method == 'POST':
         momo_id = request.form.get('momo_id')
-        print(f"📥 收到 momo_id: {momo_id}", flush=True)
+        name, price, url = get_momo_product_info(momo_id)
 
-        try:
-            name, price, url = get_momo_product_info(momo_id)
-            print(f"📦 抓到資料：{name} / {price}", flush=True)
+        if not name or not price:
+            flash("❌ 無法擷取商品資訊", "danger")
+            return redirect(url_for('index'))
 
-            if not name or not price:
-                return "❌ 無法擷取商品資訊（抓不到 name 或 price）", 500
-
-            insert_tracked(name, price, url)
-            print("✅ 寫入成功", flush=True)
-            return redirect(url_for('index', success=1))
-        
-        except Exception as e:
-            print(f"❌ 發生錯誤：{e}", flush=True)
-            return f"❌ 發生例外錯誤：{e}", 500
+        insert_tracked(name, price, url)
+        flash("✅ 成功加入追蹤清單！", "success")
+        return redirect(url_for('index'))
 
     items = get_all_tracked()
-    success = request.args.get("success")
-    return render_template('index.html', items=items, success=success)
+    return render_template('index.html', items=items)
+
 @app.route('/delete/<int:product_id>', methods=['POST'])
-def delete(product_id):
-    delete_tracked(product_id)
+def delete_product(product_id):
+    conn = sqlite3.connect('tracker.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM tracked WHERE id = ?", (product_id,))
+    c.execute("DELETE FROM price_history WHERE product_id = ?", (product_id,))
+    conn.commit()
+    conn.close()
+
+    flash("🗑️ 已刪除追蹤商品", "info")
     return redirect(url_for('index'))
 
 @app.route('/history/<int:product_id>')

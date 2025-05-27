@@ -1,78 +1,65 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <title>Momo 價格追蹤器</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Momo 價格追蹤器</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
+  <div class="container mt-4">
+    <h2 class="mb-4 text-center">🛒 Momo 商品價格追蹤</h2>
 
-<div class="container py-5">
-    <h1 class="text-center mb-4">🛒 Momo 商品價格追蹤</h1>
+    <!-- ✅ Flash 訊息顯示區塊 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-    <!-- 成功提示 -->
-    {% if success %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        ✅ 成功加入追蹤清單！
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <form method="POST" class="input-group mb-4">
+      <input type="text" name="momo_id" class="form-control" placeholder="請輸入 momo 商品 ID" required>
+      <button type="submit" class="btn btn-primary">加入追蹤</button>
+    </form>
+
+    <div class="card">
+      <div class="card-header">📋 我的追蹤清單</div>
+      <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>商品名稱</th>
+              <th>目前價格</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.name }}</td>
+                <td>${{ item.price }}</td>
+                <td>
+                  <a href="{{ item.url }}" target="_blank" class="btn btn-sm btn-primary">查看商品</a>
+                  <a href="/history/{{ item.id }}" class="btn btn-sm btn-success">價格圖表</a>
+                  <form action="/delete/{{ item.id }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('確定要刪除嗎？')">刪除</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    {% endif %}
+  </div>
 
-    <!-- 輸入表單 -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <form method="post" class="row g-3">
-                <div class="col-md-6">
-                    <label for="momo_id" class="form-label">商品 ID</label>
-                    <input type="text" class="form-control" id="momo_id" name="momo_id" placeholder="請輸入 momo 商品 ID" required>
-                </div>
-                <div class="col-md-6 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">加入追蹤</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 商品追蹤清單 -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h4 class="mb-3">📋 我的追蹤清單</h4>
-            {% if items %}
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>#</th>
-                            <th>商品名稱</th>
-                            <th>目前價格</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in items %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ item.name }}</td>
-                            <td>$ {{ item.price }}</td>
-                            <td>
-                                <a href="{{ item.url }}" class="btn btn-sm btn-outline-primary" target="_blank">查看商品</a>
-                                <a href="/history/{{ item.id }}" class="btn btn-sm btn-outline-success">價格圖表</a>
-                                <form method="post" action="/delete/{{ item.id }}" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="text-muted">尚未追蹤任何商品。</p>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
